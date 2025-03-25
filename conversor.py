@@ -6,7 +6,7 @@ import os
 # Função para selecionar imagens manualmente
 def selecionar_imagens():
     global lista_arquivos
-    arquivos = filedialog.askopenfilenames(filetypes=[("Imagens", "*.png;*.jpeg;*.bmp;*.gif")])
+    arquivos = filedialog.askopenfilenames(filetypes=[("Imagens", "*.png;*.jpeg;*.bmp;*.gif;*.pdf")])
     if arquivos:
         lista_arquivos = arquivos
         entrada_var.set("\n".join(arquivos))
@@ -14,7 +14,7 @@ def selecionar_imagens():
 # Função para converter as imagens
 def converter_imagens():
     if not lista_arquivos:
-        messagebox.showerror("Erro", "Selecione pelo menos uma imagem!")
+        messagebox.showerror("Erro", "Selecione pelo menos uma imagem ou PDF!")
         return
 
     formato_saida = formato_var.get()
@@ -30,29 +30,35 @@ def converter_imagens():
 
     try:
         for i, arquivo in enumerate(lista_arquivos):
-            img = Image.open(arquivo)
             nome_base = os.path.basename(arquivo).split('.')[0]  # Nome sem extensão
             caminho_saida = os.path.join(pasta_destino, f"{nome_base}.{formato_saida}")
 
-            if formato_saida == "png":
-                img.save(caminho_saida, format=formato_saida.upper())
-            elif formato_saida == "jpeg":  # Para JPEG, aplicamos a compressão de qualidade
-                img.convert("RGB").save(caminho_saida, format="JPEG", quality=qualidade)
-            elif formato_saida == "gif":
-                img.save(caminho_saida, format=formato_saida.upper())
+            if arquivo.lower().endswith(".pdf"):
+                # Converter PDF para imagens (apenas primeira página)
+                from pdf2image import convert_from_path
+                imagens = convert_from_path(arquivo)
+                imagens[0].save(caminho_saida, format=formato_saida.upper())
+            else:
+                img = Image.open(arquivo)
+                if formato_saida == "jpeg":  # Para JPEG, aplicamos a compressão de qualidade
+                    img.convert("RGB").save(caminho_saida, format="JPEG", quality=qualidade)
+                elif formato_saida == "pdf":
+                    img.convert("RGB").save(caminho_saida, format="PDF")
+                else:
+                    img.save(caminho_saida, format=formato_saida.upper())
 
             # Atualiza a barra de progresso
             progresso["value"] = ((i + 1) / total) * 100
             root.update_idletasks()  # Atualiza a interface
 
-        messagebox.showinfo("Sucesso", f"{total} imagens convertidas e salvas em {pasta_destino}!")
+        messagebox.showinfo("Sucesso", f"{total} arquivos convertidos e salvos em {pasta_destino}!")
     except Exception as e:
         messagebox.showerror("Erro", f"Erro ao converter: {str(e)}")
 
 # Criar janela
 root = tk.Tk()
-root.title("Conversor de Imagens")
-root.geometry("500x450")
+root.title("Conversor de Imagens e PDFs")
+root.geometry("500x500")
 
 # Variáveis
 entrada_var = tk.StringVar()
@@ -61,13 +67,13 @@ qualidade_var = tk.IntVar(value=90)  # Qualidade padrão (0 a 100)
 lista_arquivos = []  # Lista de arquivos selecionados
 
 # Widgets
-tk.Label(root, text="Arraste e solte imagens aqui ou clique para procurar:").pack(pady=5)
+tk.Label(root, text="Arraste e solte arquivos aqui ou clique para procurar:").pack(pady=5)
 tk.Entry(root, textvariable=entrada_var, width=50, state="readonly").pack()
 tk.Button(root, text="Procurar", command=selecionar_imagens).pack(pady=5)
 
 # Escolha do formato de saída
 tk.Label(root, text="Escolha o formato de saída:").pack(pady=5)
-tk.OptionMenu(root, formato_var, "png", "jpeg", "bmp", "gif").pack()
+tk.OptionMenu(root, formato_var, "png", "jpeg", "bmp", "gif", "pdf").pack()
 
 # Controle de qualidade para JPEG
 tk.Label(root, text="Qualidade (JPEG)").pack(pady=5)
