@@ -6,7 +6,7 @@ import os
 # Função para selecionar imagens manualmente
 def selecionar_imagens():
     global lista_arquivos
-    arquivos = filedialog.askopenfilenames(filetypes=[("Imagens", "*.png;*.jpeg;*.bmp;*.gif;*.pdf")])
+    arquivos = filedialog.askopenfilenames(filetypes=[("Imagens", "*.png;*.jpeg;*.bmp;*.gif;*.heic;*.heif")])
     if arquivos:
         lista_arquivos = arquivos
         entrada_var.set("\n".join(arquivos))
@@ -39,6 +39,8 @@ def converter_imagens():
                 imagens = convert_from_path(arquivo)
                 imagens[0].save(caminho_saida, format=formato_saida.upper())
             else:
+                from pillow_heif import register_heif_opener
+                register_heif_opener()
                 img = Image.open(arquivo)
                 if formato_saida == "jpeg":  # Para JPEG, aplicamos a compressão de qualidade
                     img.convert("RGB").save(caminho_saida, format="JPEG", quality=qualidade)
@@ -73,7 +75,7 @@ tk.Button(root, text="Procurar", command=selecionar_imagens).pack(pady=5)
 
 # Escolha do formato de saída
 tk.Label(root, text="Escolha o formato de saída:").pack(pady=5)
-tk.OptionMenu(root, formato_var, "png", "jpeg", "bmp", "gif", "pdf").pack()
+tk.OptionMenu(root, formato_var, "png", "jpeg", "bmp", "gif", "pdf", "heif").pack()
 
 # Controle de qualidade para JPEG
 tk.Label(root, text="Qualidade (JPEG)").pack(pady=5)
