@@ -95,7 +95,7 @@ tk.Button(root, text="Procurar Arquivos", command=selecionar_imagens, **button_s
 
 # Escolha do formato de saída
 tk.Label(root, text="Escolha o formato de saída:", font=("Arial", 10), bg="#f5f5f5").grid(row=4, column=0, padx=10, pady=5, sticky="w")
-formatos_suportados = ["png", "jpeg", "bmp", "gif", "pdf", "jpg"]
+formatos_suportados = ["png", "jpeg", "bmp", "gif", "pdf", "jpg", "heif"]
 formato_menu = ttk.Combobox(root, textvariable=formato_var, values=formatos_suportados, state="readonly", font=("Arial", 10), width=17)
 formato_menu.grid(row=5, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
 

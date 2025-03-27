@@ -1,0 +1,2 @@
+('C:\\Users\\techhelp\\Documents\\GitHub\\ImgConverterAppTest\\build\\QuackConverter_alpha_1.5.3\\PYZ-00.pyz',
+ [])
