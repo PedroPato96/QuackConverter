@@ -110,7 +110,7 @@ progresso.grid(row=8, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
 tk.Button(root, text="Converter", command=converter_imagens, **button_style).grid(row=9, column=0, columnspan=2, padx=10, pady=20)
 
 # Texto de copyright com sticky=se
-footer_label = tk.Label(root, text="© 2025 Pato.inc. Todos os direitos reservados.", font=("Arial", 8), fg="gray", bg="#f5f5f5")
+footer_label = tk.Label(root, text="© 2025 Pan American School of Porto Alegre. Todos os direitos reservados.", font=("Arial", 8), fg="gray", bg="#f5f5f5")
 footer_label.grid(row=10, column=0, columnspan=2, pady=10, sticky="s")
 
 # Configuração de redimensionamento da janela
