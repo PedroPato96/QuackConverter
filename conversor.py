@@ -83,6 +83,7 @@ def converter_imagens():
         messagebox.showwarning("Algumas conversões falharam", f"Os seguintes arquivos não foram convertidos:\n{erro_msg}")
     else:
         messagebox.showinfo("Sucesso", f"{total} arquivos convertidos e salvos em {pasta_destino}!")
+        os.startfile(pasta_destino)  # Abre automaticamente a pasta de destino
 
 # Criar janela
 root = tk.Tk()
