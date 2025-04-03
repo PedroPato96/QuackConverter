@@ -2,11 +2,59 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 from PIL import Image
 import os
+import sys
 from pillow_heif import register_heif_opener
 import fitz  # PyMuPDF
+import ctypes  # Para definir o ícone na barra de tarefas do Windows
 
 # Registrar suporte para HEIF/HEIC
 register_heif_opener()
+
+# Definir caminho do ícone corretamente
+if getattr(sys, 'frozen', False):  # Verifica se está rodando como executável
+    caminho_icone = os.path.join(sys._MEIPASS, "logo.ico")
+else:
+    caminho_icone = "C:/Users/techhelp/Documents/GitHub/ImgConverterAppTest/logo.ico"
+
+# Definir o ícone da barra de tarefas no Windows
+ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("ImgConverterApp")
+
+# Criar janela
+root = tk.Tk()
+root.title("Conversor de Imagens e PDFs")
+
+# Definir ícone na janela e barra de tarefas
+root.iconbitmap(caminho_icone)
+
+# Centralizar a janela na tela
+largura_janela = 450
+altura_janela = 510
+largura_tela = root.winfo_screenwidth()
+altura_tela = root.winfo_screenheight()
+pos_x = (largura_tela - largura_janela) // 2
+pos_y = (altura_tela - altura_janela) // 2
+root.geometry(f"{largura_janela}x{altura_janela}+{pos_x}+{pos_y}")
+root.resizable(False, False)
+root.configure(bg="#f5f5f5")
+
+# Estilo dos botões
+estilo_botoes = {
+    "font": ("Arial", 10, "bold"),
+    "bg": "#4CAF50",
+    "fg": "white",
+    "bd": 2,
+    "relief": "raised",
+    "activebackground": "#45a049",
+    "activeforeground": "white",
+    "cursor": "hand2"
+}
+
+# Variáveis
+entrada_var = tk.StringVar()
+formato_var = tk.StringVar(value="png")
+qualidade_var = tk.IntVar(value=90)
+cortar_var = tk.BooleanVar(value=False)
+lista_arquivos = []
 
 # Função para selecionar imagens manualmente
 def selecionar_imagens():
@@ -85,32 +133,6 @@ def converter_imagens():
         messagebox.showinfo("Sucesso", f"{total} arquivos convertidos e salvos em {pasta_destino}!")
         os.startfile(pasta_destino)  # Abre automaticamente a pasta de destino
 
-# Criar janela
-root = tk.Tk()
-root.title("Conversor de Imagens e PDFs")
-
-# Centralizar a janela na tela
-largura_janela = 450
-altura_janela = 510
-largura_tela = root.winfo_screenwidth()
-altura_tela = root.winfo_screenheight()
-pos_x = (largura_tela - largura_janela) // 2
-pos_y = (altura_tela - altura_janela) // 2
-root.geometry(f"{largura_janela}x{altura_janela}+{pos_x}+{pos_y}")
-root.resizable(False, False)
-root.configure(bg="#f5f5f5")
-
-# Variáveis
-entrada_var = tk.StringVar()
-formato_var = tk.StringVar(value="png")
-qualidade_var = tk.IntVar(value=90)
-cortar_var = tk.BooleanVar(value=False)
-lista_arquivos = []
-
-# Estilo dos botões
-button_style = {'font': ('Arial', 12, 'bold'), 'bg': '#4CAF50', 'fg': 'white', 'relief': 'flat', 'bd': 0, 'highlightthickness': 0, 'cursor': 'hand2'}
-entry_style = {'font': ('Arial', 10), 'bg': '#eaeaea', 'relief': 'solid', 'bd': 1, 'highlightthickness': 0, 'borderwidth': 0}
-
 # Layout usando Grid
 root.columnconfigure(0, weight=1)
 root.columnconfigure(1, weight=1)
@@ -121,8 +143,8 @@ header_label.grid(row=0, column=0, columnspan=2, sticky="ew", pady=10)
 
 # Seleção de arquivos
 tk.Label(root, text="Selecione os arquivos:", font=("Arial", 10), bg="#f5f5f5").grid(row=1, column=0, padx=10, pady=5, sticky="w")
-tk.Entry(root, textvariable=entrada_var, state="readonly", **entry_style).grid(row=2, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
-tk.Button(root, text="Procurar Arquivos", command=selecionar_imagens, **button_style).grid(row=3, column=0, columnspan=2, padx=10, pady=10)
+tk.Entry(root, textvariable=entrada_var, state="readonly").grid(row=2, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
+tk.Button(root, text="Procurar Arquivos", command=selecionar_imagens, **estilo_botoes).grid(row=3, column=0, columnspan=2, padx=10, pady=10)
 
 # Escolha do formato de saída
 tk.Label(root, text="Formato de saída:", font=("Arial", 10), bg="#f5f5f5").grid(row=4, column=0, padx=10, pady=5, sticky="w")
@@ -130,23 +152,21 @@ formatos_suportados = ["png", "jpeg", "bmp", "gif", "pdf", "jpg", "heif"]
 formato_menu = ttk.Combobox(root, textvariable=formato_var, values=formatos_suportados, state="readonly", font=("Arial", 10))
 formato_menu.grid(row=5, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
 
-# Controle de qualidade para JPEG
-tk.Label(root, text="Qualidade (JPEG)", font=("Arial", 10), bg="#f5f5f5").grid(row=6, column=0, padx=10, pady=5, sticky="w")
-tk.Scale(root, from_=10, to=100, orient="horizontal", variable=qualidade_var, sliderlength=20, length=300).grid(row=7, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
+# Opção de cortar a imagem
+cortar_check = tk.Checkbutton(root, text="Cortar em quadrado", variable=cortar_var, bg="#f5f5f5")
+cortar_check.grid(row=6, column=0, columnspan=2, pady=5)
 
-# Checkbox para cortar em quadrado
-tk.Checkbutton(root, text="Cortar imagens para formato quadrado", variable=cortar_var, font=("Arial", 10), bg="#f5f5f5").grid(row=8, column=0, columnspan=2, padx=10, pady=5)
+# Qualidade da imagem
+tk.Label(root, text="Qualidade de Imagem (Quanto maior, mais pesada):", font=("Arial", 10), bg="#f5f5f5").grid(row=7, column=0, padx=10, pady=5, sticky="w")
+qualidade_slider = tk.Scale(root, from_=10, to=100, orient="horizontal", variable=qualidade_var)
+qualidade_slider.grid(row=8, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
 
 # Barra de progresso
 progresso = ttk.Progressbar(root, orient="horizontal", length=400, mode="determinate", maximum=100)
 progresso.grid(row=9, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
 
 # Botão de conversão
-tk.Button(root, text="Converter", command=converter_imagens, **button_style).grid(row=10, column=0, columnspan=2, padx=10, pady=20)
-
-# Texto de copyright fixo no rodapé
-footer_label = tk.Label(root, text="© 2025 Pan American School of Porto Alegre. Todos os direitos reservados.", font=("Arial", 8), fg="gray", bg="#f5f5f5")
-footer_label.grid(row=11, column=0, columnspan=2, pady=10)
+tk.Button(root, text="Converter", command=converter_imagens, **estilo_botoes).grid(row=10, column=0, columnspan=2, padx=10, pady=20)
 
 # Executar a janela
 root.mainloop()
