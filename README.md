@@ -46,7 +46,8 @@ O **QuackConverter** é uma ferramenta simples e eficiente para conversão de im
 
 ## 🔒 Licença
 
-Este projeto é **proprietário**.  
+Este projeto é 100% proprietário.
+
 Todos os direitos reservados © Pedro Silveira Ricardo (2024-2025).
 
 Para uso comercial ou redistribuição, entre em contato com o autor.
