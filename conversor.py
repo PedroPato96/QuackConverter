@@ -1,3 +1,19 @@
+# -*- coding: utf-8 -*-
+"""
+QuackConverter - Conversor de Imagens e PDFs
+Versão: Alpha 2.0.0
+Autor: Pedro Silveira Ricardo
+Copyright © 2024-2025 Pedro Silveira Ricardo. Todos os direitos reservados.
+
+Descrição:
+Aplicativo em Tkinter para converter imagens (PNG, JPG, HEIC, etc.) e PDFs
+com opções de corte e ajuste de qualidade. Suporte para conversão em lote
+e visualmente otimizado para uso no Windows.
+
+Licença: Uso pessoal e não comercial. Distribuição proibida sem autorização.
+"""
+
+
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 from PIL import Image
