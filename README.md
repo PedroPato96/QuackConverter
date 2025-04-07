@@ -1,3 +1,5 @@
+> ⚠️ Este projeto é proprietário. Todos os direitos autorais pertencem a Pedro Silveira Ricardo. Nenhum uso, cópia ou redistribuição é permitido sem autorização prévia.
+
 # QuackConverter - Conversor de Imagens e PDFs
 
 **Versão:** Alpha 2.0.2  
