@@ -1,0 +1,11 @@
+Copyright (c) 2025 Pedro Silveira Ricardo
+
+Todos os direitos reservados.
+
+Este software é fornecido apenas para fins educacionais e de uso pessoal.  
+É proibida a redistribuição, modificação, engenharia reversa ou uso comercial sem a permissão expressa do autor.
+
+Qualquer uso indevido ou não autorizado deste software poderá resultar em medidas legais.
+
+Para obter uma licença comercial ou permissões específicas, entre em contato com:
+pedropatolol@gmail.com
