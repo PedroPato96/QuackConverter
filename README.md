@@ -1,6 +1,3 @@
-> ⚠️ Este projeto é proprietário. Todos os direitos autorais pertencem a Pedro Silveira Ricardo. Nenhum uso, cópia ou redistribuição é permitido sem autorização prévia.
-![Licença](https://img.shields.io/badge/licença-Proprietária-red)
-
 # QuackConverter - Conversor de Imagens e PDFs
 
 **Versão:** Alpha 2.0.2  
