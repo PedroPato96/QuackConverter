@@ -100,69 +100,87 @@ def cortar_para_quadrado(imagem):
 def cortar_manual(imagem):
     from PIL import ImageTk
 
+    max_largura = int(root.winfo_screenwidth() * 0.8)
+    max_altura = int(root.winfo_screenheight() * 0.8)
+
+    img_exibicao = imagem.copy()
+    fator_escala = min(max_largura / img_exibicao.width, max_altura / img_exibicao.height, 1)
+    nova_largura = int(img_exibicao.width * fator_escala)
+    nova_altura = int(img_exibicao.height * fator_escala)
+    img_exibicao = img_exibicao.resize((nova_largura, nova_altura), Image.LANCZOS)
+
     win = tk.Toplevel()
     win.title("Corte Manual")
-    img_tk = ImageTk.PhotoImage(imagem)
+    win.geometry(f"{nova_largura+20}x{nova_altura+70}")
+    img_tk = ImageTk.PhotoImage(img_exibicao)
 
-    canvas = tk.Canvas(win, width=imagem.width, height=imagem.height, cursor="cross")
+    canvas = tk.Canvas(win, width=nova_largura, height=nova_altura, cursor="cross")
     canvas.pack()
     canvas.create_image(0, 0, anchor="nw", image=img_tk)
 
     rect_id = None
-    handles = {}
-    dragging_handle = None
     selecao = {"x0": None, "y0": None, "x1": None, "y1": None}
+    dragging = {"type": None, "start_x": 0, "start_y": 0}
 
-    handle_size = 6
-
-    def draw_handles(x0, y0, x1, y1):
-        nonlocal handles
-        for handle in handles.values():
-            canvas.delete(handle)
-        handles = {}
-
-        # Canto inferior direito apenas (pode expandir para todos depois)
-        handles["br"] = canvas.create_rectangle(
-            x1 - handle_size, y1 - handle_size, x1 + handle_size, y1 + handle_size,
-            fill="red", tags="handle"
-        )
+    def dentro_area(x, y, margem=5):
+        x0, y0, x1, y1 = selecao["x0"], selecao["y0"], selecao["x1"], selecao["y1"]
+        if None in (x0, y0, x1, y1):
+            return None
+        pontos = {
+            "left": abs(x - x0) <= margem and y0 <= y <= y1,
+            "right": abs(x - x1) <= margem and y0 <= y <= y1,
+            "top": abs(y - y0) <= margem and x0 <= x <= x1,
+            "bottom": abs(y - y1) <= margem and x0 <= x <= x1,
+            "inside": x0 < x < x1 and y0 < y < y1
+        }
+        for k, v in pontos.items():
+            if v:
+                return k
+        return None
 
     def on_mouse_down(event):
-        nonlocal rect_id, dragging_handle
-
-        if rect_id is not None:
-            # Verifica se clicou em um handle
-            x, y = event.x, event.y
-            coords = canvas.coords(rect_id)
-            x0, y0, x1, y1 = coords
-
-            hx, hy = x1, y1
-            if abs(x - hx) < 10 and abs(y - hy) < 10:
-                dragging_handle = "br"
-                return
-
-            return  # Ignora outras áreas
-
-        selecao["x0"] = event.x
-        selecao["y0"] = event.y
-        rect_id = canvas.create_rectangle(event.x, event.y, event.x, event.y, outline="red", width=2)
+        modo = dentro_area(event.x, event.y)
+        if modo:
+            dragging["type"] = modo
+            dragging["start_x"] = event.x
+            dragging["start_y"] = event.y
+        else:
+            selecao["x0"] = event.x
+            selecao["y0"] = event.y
+            selecao["x1"] = event.x
+            selecao["y1"] = event.y
+            nonlocal rect_id
+            if rect_id:
+                canvas.delete(rect_id)
+            rect_id = canvas.create_rectangle(event.x, event.y, event.x, event.y, outline="red", width=2)
+            dragging["type"] = "new"
 
     def on_mouse_drag(event):
-        nonlocal rect_id
-        if dragging_handle == "br":
+        if dragging["type"] == "new":
             selecao["x1"] = event.x
             selecao["y1"] = event.y
-            canvas.coords(rect_id, selecao["x0"], selecao["y0"], selecao["x1"], selecao["y1"])
-            draw_handles(selecao["x0"], selecao["y0"], selecao["x1"], selecao["y1"])
-        elif rect_id and selecao["x0"] is not None:
+        elif dragging["type"] == "left":
+            selecao["x0"] = event.x
+        elif dragging["type"] == "right":
             selecao["x1"] = event.x
+        elif dragging["type"] == "top":
+            selecao["y0"] = event.y
+        elif dragging["type"] == "bottom":
             selecao["y1"] = event.y
-            canvas.coords(rect_id, selecao["x0"], selecao["y0"], selecao["x1"], selecao["y1"])
-            draw_handles(selecao["x0"], selecao["y0"], selecao["x1"], selecao["y1"])
+        elif dragging["type"] == "inside":
+            dx = event.x - dragging["start_x"]
+            dy = event.y - dragging["start_y"]
+            selecao["x0"] += dx
+            selecao["x1"] += dx
+            selecao["y0"] += dy
+            selecao["y1"] += dy
+            dragging["start_x"] = event.x
+            dragging["start_y"] = event.y
+
+        canvas.coords(rect_id, selecao["x0"], selecao["y0"], selecao["x1"], selecao["y1"])
 
     def on_mouse_up(event):
-        nonlocal dragging_handle
-        dragging_handle = None
+        dragging["type"] = None
 
     def confirmar():
         if rect_id and all(selecao[k] is not None for k in ["x0", "y0", "x1", "y1"]):
@@ -175,18 +193,17 @@ def cortar_manual(imagem):
     canvas.bind("<ButtonRelease-1>", on_mouse_up)
 
     tk.Button(win, text="Confirmar corte", command=confirmar).pack(pady=10)
-
     root.wait_window(win)
 
     if all(selecao[k] is not None for k in ["x0", "y0", "x1", "y1"]):
+        escala_inversa = 1 / fator_escala
         box = (
-            min(selecao["x0"], selecao["x1"]),
-            min(selecao["y0"], selecao["y1"]),
-            max(selecao["x0"], selecao["x1"]),
-            max(selecao["y0"], selecao["y1"]),
+            int(min(selecao["x0"], selecao["x1"]) * escala_inversa),
+            int(min(selecao["y0"], selecao["y1"]) * escala_inversa),
+            int(max(selecao["x0"], selecao["x1"]) * escala_inversa),
+            int(max(selecao["y0"], selecao["y1"]) * escala_inversa),
         )
         return imagem.crop(box)
-
     return imagem
 
 def ao_alterar_um_pdf():
